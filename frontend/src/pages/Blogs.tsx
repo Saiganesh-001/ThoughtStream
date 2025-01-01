@@ -6,7 +6,6 @@ import { useBlogs } from "../hooks";
 export const Blogs = () => {
 	const { loading, blogs } = useBlogs();
 
-	console.log(blogs);
 	if (loading) {
 		return (
 			<div>
@@ -29,6 +28,7 @@ export const Blogs = () => {
 				<div className="flex flex-col gap-3 min-w-[50vw]">
 					{blogs.map((blog) => (
 						<BlogCard
+							key={blog.id}
 							id={blog.id}
 							authorName={blog.author.name || "Anonymous"}
 							title={blog.title}
