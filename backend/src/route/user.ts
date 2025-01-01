@@ -28,6 +28,7 @@ userRouter.post("/signup", async (c) => {
 	try {
 		const user = await prisma.user.create({
 			data: {
+				name: body.name,
 				email: body.email,
 				password: body.password,
 			},
@@ -35,6 +36,7 @@ userRouter.post("/signup", async (c) => {
 
 		const token = await sign({ id: user.id }, c.env.JWT_SECRET);
 		return c.json({
+			user,
 			jwt: token,
 		});
 	} catch (e) {

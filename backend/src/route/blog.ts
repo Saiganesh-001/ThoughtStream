@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
 import { verify } from "hono/jwt";
-import { JWTPayload } from "hono/utils/jwt/types";
 
 export const blogRouter = new Hono<{
 	Bindings: {
@@ -15,9 +14,7 @@ export const blogRouter = new Hono<{
 }>();
 
 blogRouter.use("/*", async (c, next) => {
-	const header = c.req.header("Authorization") || "";
-
-	const token = header?.split(" ")[1];
+	const token = c.req.header("Authorization") || "";
 
 	try {
 		const response = await verify(token, c.env.JWT_SECRET);
@@ -83,7 +80,18 @@ blogRouter.get("/bulk", async (c) => {
 		datasourceUrl: c.env.DATABASE_URL,
 	}).$extends(withAccelerate());
 
-	const posts = await prisma.post.findMany();
+	const posts = await prisma.post.findMany({
+		select: {
+			content: true,
+			title: true,
+			id: true,
+			author: {
+				select: {
+					name: true
+				}
+			}
+		}
+	});
 
 	return c.json({
 		posts,
@@ -101,6 +109,16 @@ blogRouter.get("/:id", async (c) => {
 			where: {
 				id,
 			},
+			select: {
+				content: true,
+				title: true,
+				id: true,
+				author: {
+					select: {
+						name: true
+					}
+				}
+			}
 		});
 		return c.json({
 			post,
